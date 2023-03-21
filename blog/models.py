@@ -23,7 +23,7 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=255, verbose_name='Заголовок')
     content = models.TextField(verbose_name='Зміст')
     Tags = models.ManyToManyField(Tag, related_name='posts', verbose_name='Теги', null=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор', related_name='posts')
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)
 
@@ -47,7 +47,7 @@ class Profile(models.Model):
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            Profile.objects.create(user=instance)
+            Profile.objects.create(account=instance)
 
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
@@ -58,15 +58,24 @@ class Profile(models.Model):
         verbose_name_plural = 'Профілі користувачів'
 
 
-class CommentOwner(models.Model):
-    """Проміжна модель для визначення належності коментарю, містить посилання на пост чи інший комментар, автоматично
-    створюється при створенні коментаря"""
+class Comment(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор коментаря')
+    content = models.CharField(max_length=255, verbose_name='Зміст коментаря')
+    time_create = models.DateTimeField(auto_now_add=True)
+    time_update = models.DateTimeField(auto_now=True)
     post = models.OneToOneField(BlogPost, null=True, blank=True, on_delete=models.CASCADE)
     comment = models.OneToOneField('Comment', null=True, blank=True, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.content
+
+    def getOwner(self):
+        return self.post or self.comment
+
     class Meta:
-        verbose_name = 'Належність коментарю'
-        verbose_name_plural = 'Належності коментарів'
+        verbose_name = 'Коментар'
+        verbose_name_plural = "Коментарі"
+        ordering = ['time_update', 'time_create']
         constraints = [
             models.CheckConstraint(
                 check=Q(post__isnull=False) | Q(comment__isnull=False),
@@ -74,32 +83,3 @@ class CommentOwner(models.Model):
             ), models.CheckConstraint(
                 check=Q(post__isnull=True) | Q(comment__isnull=True),
                 name='not_both_true')]
-
-    def __str__(self):
-        ref = self.post or self.comment
-        return str(ref)
-
-    @receiver(post_save, sender='Comment')
-    def create_owner(sender, instance, created, **kwargs):
-        if created:
-            CommentOwner.objects.create(group=instance)
-
-    @receiver(post_save, sender='Comment')
-    def save_owner(sender, instance, **kwargs):
-        instance.commentowner.save()
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, verbose_name='Пост коментаря')
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор коментаря')
-    content = models.CharField(max_length=255, verbose_name='Зміст коментаря')
-    time_create = models.DateTimeField(auto_now_add=True)
-    time_update = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.content
-
-    class Meta:
-        verbose_name = 'Коментар'
-        verbose_name_plural = "Коментарі"
-        ordering = ['time_update', 'time_create']
