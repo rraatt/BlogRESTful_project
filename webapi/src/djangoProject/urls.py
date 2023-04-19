@@ -16,15 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
+from blog.views import BlogAPIList, BlogAPIRetrieve
+
 # from women.views import WomenAPIList, WomenAPIUpdate, WomenAPIDestroyView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/v1/auth/', include('djoser.urls.authtoken'))
-
+    re_path(r'^api/v1/auth/', include('djoser.urls.authtoken')),
     # path('api/v1/', include(router.urls))
-    # path('api/v1/women/', WomenAPIList.as_view()),
-    # path('api/v1/women/<int:pk>/', WomenAPIUpdate.as_view()),
+    path('api/v1/blogs/', BlogAPIList.as_view()),
+    path('api/v1/blogs/<int:pk>/', BlogAPIRetrieve.as_view()),
     # path('api/v1/womendelete/<int:pk>/', WomenAPIDestroyView.as_view()),
     # path('api/v1/auth/', include('djoser.urls')),
 
