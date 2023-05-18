@@ -16,17 +16,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
-from blog.views import BlogAPIList, BlogAPIRetrieve
+from blog.views import BlogAPIList, BlogAPIRetrieve, UserRegistrationView, ProfileView, BlogAPIUpdateDestroyView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
-# from women.views import WomenAPIList, WomenAPIUpdate, WomenAPIDestroyView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^api/v1/auth/', include('djoser.urls.authtoken')),
-    # path('api/v1/', include(router.urls))
     path('api/v1/blogs/', BlogAPIList.as_view()),
     path('api/v1/blogs/<int:pk>/', BlogAPIRetrieve.as_view()),
-    # path('api/v1/womendelete/<int:pk>/', WomenAPIDestroyView.as_view()),
-    # path('api/v1/auth/', include('djoser.urls')),
-
+    path('api/v1/blogs/<int:pk>/edit/', BlogAPIUpdateDestroyView.as_view()),
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/v1/register/', UserRegistrationView.as_view(), name='registration'),
+    path('api/v1/profile/<int:pk>/', ProfileView.as_view(), name='profile')
 ]

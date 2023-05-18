@@ -1,12 +1,36 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from blog.models import BlogPost, Comment, Tag
+from blog.models import BlogPost, Comment, Tag, Profile
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for registering employees into the system"""
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+        )
+        return user
 
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name']
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    account = AuthorSerializer()
+
+    class Meta:
+        model = Profile
+        fields = ['account', 'bio']
 
 
 class TagsSerializer(serializers.ModelSerializer):

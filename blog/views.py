@@ -1,15 +1,41 @@
 from django.db.models import Q
-from django.shortcuts import render
+from djoser.conf import User
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from blog.models import BlogPost
-from blog.permissions import IsOwnerOrReadOnly, IsOwnerOrAdmin
-from blog.serializers import BlogDetailedSerializer, BlogUpdateCreateSerializer, BlogListSerializer
+from blog.models import BlogPost, Profile
+from blog.permissions import IsOwnerOrReadOnly, IsOwnerOrAdmin, IsAuthUser
+from blog.serializers import BlogDetailedSerializer, BlogUpdateCreateSerializer, BlogListSerializer, \
+    UserRegistrationSerializer, ProfileSerializer
 
 
-# Create your views here.
+class UserRegistrationView(generics.CreateAPIView):
+    """Registering employees into the system"""
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'message': 'User account created successfully',
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        })
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    queryset = Profile.objects.all()
+    permission_classes = [IsAuthUser, ]
+    serializer_class = ProfileSerializer
+
 
 class BlogAPIListPagination(PageNumberPagination):
     page_size = 5
@@ -48,5 +74,3 @@ class BlogAPIUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogUpdateCreateSerializer
     permission_classes = (IsOwnerOrAdmin,)
-
-

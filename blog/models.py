@@ -43,7 +43,7 @@ class Profile(models.Model):
     bio = models.TextField(verbose_name='Про себе', null=True)
 
     def __str__(self):
-        return self.account.get_full_name()
+        return self.account.get_full_name() or self.account.username
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
