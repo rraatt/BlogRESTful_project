@@ -70,9 +70,15 @@ class BlogUpdateCreateSerializer(serializers.ModelSerializer):
 
 
 class BlogListSerializer(serializers.ModelSerializer):
-    author = AuthorSerializer()
-    tags = TagsSerializer(many=True)
+    author = AuthorSerializer(required=False)
+    tags = TagsSerializer(many=True, required=False)
 
     class Meta:
         model = BlogPost
         fields = ['title', 'content', 'author', 'tags']
+
+    def create(self, validated_data):
+        author = self.context['request'].user
+        validated_data['author'] = author
+        menu = BlogPost.objects.create(**validated_data)
+        return menu

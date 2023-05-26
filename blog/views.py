@@ -2,14 +2,14 @@ from django.db.models import Q
 from djoser.conf import User
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from blog.models import BlogPost, Profile
-from blog.permissions import IsOwnerOrReadOnly, IsOwnerOrAdmin, IsAuthUser
+from blog.models import BlogPost, Profile, Tag
+from blog.permissions import IsOwnerOrReadOnly, IsOwnerOrAdmin, IsAuthUser, IsAdminOrReadOnly
 from blog.serializers import BlogDetailedSerializer, BlogUpdateCreateSerializer, BlogListSerializer, \
-    UserRegistrationSerializer, ProfileSerializer
+    UserRegistrationSerializer, ProfileSerializer, TagsSerializer
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -74,3 +74,10 @@ class BlogAPIUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogUpdateCreateSerializer
     permission_classes = (IsOwnerOrAdmin,)
+
+
+class TagsView(generics.ListCreateAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagsSerializer
+    permission_classes = (IsAdminOrReadOnly, )
+

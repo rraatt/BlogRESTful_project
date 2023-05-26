@@ -16,14 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 
-from blog.views import BlogAPIList, BlogAPIRetrieve, UserRegistrationView, ProfileView, BlogAPIUpdateDestroyView
+from blog.views import BlogAPIList, BlogAPIRetrieve, UserRegistrationView, ProfileView, BlogAPIUpdateDestroyView, \
+    TagsView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/v1/auth/', include('djoser.urls.authtoken')),
     path('api/v1/blogs/', BlogAPIList.as_view()),
     path('api/v1/blogs/<int:pk>/', BlogAPIRetrieve.as_view()),
     path('api/v1/blogs/<int:pk>/edit/', BlogAPIUpdateDestroyView.as_view()),
@@ -31,5 +31,6 @@ urlpatterns = [
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('api/v1/register/', UserRegistrationView.as_view(), name='registration'),
-    path('api/v1/profile/<int:pk>/', ProfileView.as_view(), name='profile')
+    path('api/v1/profile/<int:pk>/', ProfileView.as_view(), name='profile'),
+    path('api/v1/tags/', TagsView.as_view(), name='tags')
 ]
